@@ -150,3 +150,43 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
+
+// --- Observer para Animações ao Rolar a Página (Com Reversão) ---
+document.addEventListener("DOMContentLoaded", () => {
+    // Seleciona todas as seções principais ou elementos com as classes de animação
+    const revealElements = document.querySelectorAll('section > div, .glass-card, #sobre h2, #projetos h2, #habilidades h2, #trajetoria h2, #contato h2');
+    
+    // Adiciona a classe base automaticamente para quem não tiver no HTML
+    revealElements.forEach(el => {
+        if (!el.classList.contains('reveal-on-scroll') && !el.classList.contains('reveal-left') && !el.classList.contains('reveal-right')) {
+            el.classList.add('reveal-on-scroll');
+        }
+    });
+
+    const observerOptions = {
+        root: null,
+        // O threshold define quanto do elemento precisa aparecer para disparar. 
+        // 0.1 significa 10% visível.
+        threshold: 0.15,
+        rootMargin: "0px 0px -50px 0px"
+    };
+
+    const scrollObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Rolando para baixo: o elemento entrou na tela -> ativa a animação
+                entry.target.classList.add('active');
+            } else {
+                // Rolando para cima (ou saindo da tela para baixo): desfaz a animação
+                // Verificamos se o elemento está acima da viewport (rolou para cima)
+                if (entry.boundingClientRect.top > 0) {
+                    entry.target.classList.remove('active');
+                }
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal-on-scroll, .reveal-left, .reveal-right').forEach(el => {
+        scrollObserver.observe(el);
+    });
+});
